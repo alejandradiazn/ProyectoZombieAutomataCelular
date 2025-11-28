@@ -23,4 +23,4 @@ En su elaboración, la simulación utiliza una grilla donde cada célula represe
 
 **Manejo de aproximación al comportamiento de un diagrama de estados.**
 ![Aproximación del Diagrama de Estados de la autómata celular trabajada](diagrama.png)
-- La anterior imagen es el diagrama de estados de nuestra autómata celular
+- La anterior imagen es una propuesta de una especie de diagrama de estados de nuestro autómata celular.
