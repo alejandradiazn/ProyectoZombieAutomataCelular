@@ -1,5 +1,7 @@
 # 🧬 Simulador de Infección Zombie en Torrente Sanguíneo -Autómata Celular
 
+![Portada Equipo](portada.png)
+
 - El presente repositorio recopila variedad de archivos en relación con el proyecto final de la asignatura Autómatas y Lenguajes Formales dictada por el docente Luis Guayacán en 2025-2.
 
 ## Descripción General.
