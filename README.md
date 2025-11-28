@@ -16,7 +16,7 @@ En su elaboración, la simulación utiliza una grilla donde cada célula represe
 
 ---
 
-## 🧫 Tipos de Células y sus Roles
+## Tipos de Células.
 
 ### Células Sanas
 - **Plasma** (53%): Estado neutro, base del sistema
@@ -35,7 +35,7 @@ En su elaboración, la simulación utiliza una grilla donde cada célula represe
 
 ---
 
-## ⚙️ Reglas y Mecánicas del Autómata
+## Reglas y Parámetros del Autómata.
 
 ### 🔴 **GLÓBULOS ROJOS**
 
@@ -60,7 +60,7 @@ El riesgo de infección se calcula sumando tres factores:
 Los neutrófilos se activan cuando detectan 2 o más virus o células infectadas en su vecindario y, al activarse, su nivel de energía se restaura a 100.
 
 #### Fagocitosis (Se ejecuta con los Neutrófilos Activados).
-La probabilidad de fagocitosis exitosa es de 65%, pero disminuye si la célula tiene alta carga viral. Por cada 200 puntos de carga viral, la probabilidad baja proporcionalmente.
+La probabilidad de fagocitosis exitosa es de 65% pero, disminuye si la célula tiene alta carga viral; es así que por cada 200 puntos de carga viral, la probabilidad baja proporcionalmente.
 
 *Proceso de fagocitosis:*
 1. Si hay virus cercanos y el neutrófilo tiene más de 30 puntos de energía:
@@ -69,7 +69,7 @@ La probabilidad de fagocitosis exitosa es de 65%, pero disminuye si la célula t
    - **Muerte celular por agotamiento**: Si la energía cae por debajo de 20 o si aleatoriamente (30% de probabilidad) ocurre, el neutrófilo muere y se convierte en plasma.
 
 #### Resistencia a Infección
-Los neutrófilos tienen resistencia moderada. La probabilidad de infección base es del 35%, aumentando según la carga viral (cada 150 puntos de carga viral suma proporcionalmente a la probabilidad).
+Los neutrófilos tienen resistencia moderada y su probabilidad de infección base es del 35%, aumentando según la carga viral (cada 150 puntos de carga viral suma proporcionalmente a la probabilidad).
 
 - Si hay 4 o más zombies cercanos o la carga viral supera 75, se evalúa si el neutrófilo se infecta usando esta probabilidad.
 
@@ -78,41 +78,38 @@ Si no hay amenazas (cero virus y cero células infectadas) y el neutrófilo ha e
 
 ---
 
-### 🔵 **LINFOCITOS** (Respuesta Adaptativa)
+### 🔵 **LINFOCITOS** (Representación de Respuesta Adaptativa)
 
 #### Sistema de Memoria Inmune
-Los linfocitos cuentan con un sistema de memoria que les permite reaccionar más rápido ante amenazas conocidas:
-- **Umbral normal**: Se activan cuando hay 2 o más células infectadas o zombie cercanas
-- **Con memoria alta** (mayor a 60): Se activan con solo 1 célula amenazante, reaccionando mucho más rápido
+Los linfocitos cuentan con un sistema de memoria inmune que les permite reaccionar más rápido ante amenazas conocidas:
+- **Umbral normal**: Se activan cuando hay 2 o más células infectadas o zombie cercanas.
+- **Con memoria alta** (estableccida como mayor a 60): Se activan con solo 1 célula que represente amenaza, reaccionando mucho más rápido.
 
 #### Producción de Anticuerpos (Linfocitos Activados)
 Cuando están activos, los linfocitos producen anticuerpos constantemente:
-- **Producción normal**: Aumentan 5 puntos de anticuerpos por turno
-- **Producción acelerada**: Si la memoria inmune supera 70, producen 8 puntos por turno
-- Además, cada turno la memoria inmune aumenta en 3 puntos (máximo 100)
+- **Producción normal**: Aumentan 5 puntos de anticuerpos por turno  (Generación de cada celda en la ejecución).
+- **Producción acelerada**: Si la memoria inmune supera 70, producen 8 puntos por turno.
+- Así mismo, cada turno la memoria inmune aumenta en 3 puntos (máximo 100).
 
 #### Curación de Células Infectadas
 Los linfocitos pueden rescatar células infectadas mediante anticuerpos:
 
-**Cálculo del bonus de memoria**: La memoria inmune se divide entre 200, dando un bonus de 0 a 0.5
-
-**Probabilidad de curación**: Se calcula como (0.35 más el bonus de memoria) multiplicado por el porcentaje de anticuerpos actuales
-
-**Reducción viral**: Si la curación tiene éxito, reduce la carga viral entre 30 y 50 puntos, dependiendo de la memoria (suma 30 más la memoria dividida entre 5)
-
-**Condiciones**: Debe haber células infectadas cercanas, el nivel de anticuerpos debe superar 70, y se genera un número aleatorio que se compara con la probabilidad calculada.
+*Cálculo del bonus de memoria*: La memoria inmune se divide entre 200, dando un bonus de 0 a 0.5-
+*Probabilidad de curación*: Se calcula como (0.35 más el bonus de memoria) multiplicado por el porcentaje de anticuerpos actuales
+*Reducción viral*: Si la curación tiene éxito, reduce la carga viral entre 30 y 50 puntos, dependiendo de la memoria (suma 30 más la memoria dividida entre 5).
+*Condiciones*: Debe haber células infectadas cercanas, el nivel de anticuerpos debe superar 70, y se genera un número aleatorio que se compara con la probabilidad calculada.
 
 #### Resistencia Superior
 Los linfocitos son más resistentes que los neutrófilos:
-- **Resistencia normal**: 20% de probabilidad de infección en condiciones extremas
-- **Con memoria alta** (mayor a 50): Solo 10% de probabilidad de infección
-- Solo se evalúa infección si hay 5 o más zombies y la carga viral supera 85
+- *Resistencia normal*: 20% de probabilidad de infección en condiciones extremas.
+- *Con memoria alta* (establecida como mayor a 50): Solo 10% de probabilidad de infección.
+- Solo se evalúa infección si hay 5 o más zombies y la carga viral supera 85.
 
 #### Desactivación Inteligente con Vigilancia
 Los linfocitos permanecen activos más tiempo cuando tienen memoria:
-- **Desactivación normal**: Después de 8 turnos sin amenazas
-- **Con memoria alta** (mayor a 80): Permanecen vigilantes hasta 15 turnos
-- Solo se desactivan si no hay virus, infectadas ni zombies en el área
+- *Desactivación normal*: Después de 8 turnos sin amenazas.
+- *Con memoria alta* (mayor a 80): Permanecen vigilantes hasta 15 turnos.
+- Solo se desactivan si no hay virus, infectadas ni zombies en el área.
 
 ---
 
