@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Celular - Grilla y Algoritmo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            position: relative;
+            background: radial-gradient(circle at center, #1a0a1a 0%, #0a0a0a 100%);
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(139, 0, 0, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 69, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: 15%;
+            right: 15%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        h2 {
+            font-size: 3.5em;
+            color: #ff69b4;
+            text-shadow: 0 0 15px #ff69b4;
+            margin-bottom: 40px;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .content-box {
+            background: rgba(139, 0, 0, 0.15);
+            border: 3px solid #c94580;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(201, 69, 128, 0.4);
+            z-index: 1;
+        }
+
+        .intro-text {
+            font-size: 1.4em;
+            line-height: 1.8;
+            color: #ffb6c1;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .list-items {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-items li {
+            font-size: 1.3em;
+            color: #ffb6c1;
+            margin-bottom: 20px;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .list-items li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #ff69b4;
+            font-size: 1.5em;
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: #ff69b4;
+            text-shadow: 0 0 10px #ff69b4;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .stars {
+            position: absolute;
+            font-size: 2em;
+            opacity: 0.5;
+        }
+
+        .star1 { top: 5%; right: 10%; }
+        .star2 { top: 15%; left: 15%; }
+        .star3 { bottom: 10%; left: 20%; }
+        .star4 { bottom: 20%; right: 15%; }
+
+        /* Grid Visual */
+        .grid-container {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .grid-visual {
+            display: grid;
+            grid-template-columns: repeat(8, 45px);
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #c94580;
+        }
+
+        .grid-cell {
+            width: 45px;
+            height: 45px;
+            border: 1px solid rgba(201, 69, 128, 0.3);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .grid-cell.center {
+            border: 3px solid #ff69b4;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+            animation: pulse-center 2s ease-in-out infinite;
+        }
+
+        .grid-cell.neighbor {
+            border: 2px solid #00bfff;
+            background: rgba(0, 191, 255, 0.1);
+        }
+
+        @keyframes pulse-center {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 25px rgba(255, 105, 180, 0.9);
+            }
+        }
+
+        .grid-explanation {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .grid-explanation .list-items li {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        /* Code Box */
+        .code-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #c94580;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            color: #ffb6c1;
+            font-size: 1em;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-box .keyword {
+            color: #ff69b4;
+            font-weight: bold;
+        }
+
+        .code-box .function {
+            color: #00bfff;
+        }
+
+        .code-box .comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        /* Two Columns Layout */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .column-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #c94580;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .column-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(201, 69, 128, 0.6);
+        }
+
+        .column-item h3 {
+            color: #ff69b4;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .column-item p {
+            color: #ffb6c1;
+            font-size: 1.1em;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* Icon Box */
+        .icon-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #c94580;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .icon-box:hover {
+            background: rgba(201, 69, 128, 0.2);
+            transform: translateX(10px);
+        }
+
+        .icon-box .icon {
+            font-size: 3em;
+            filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.6));
+        }
+
+        .icon-box .text {
+            flex: 1;
+        }
+
+        .icon-box .text h3 {
+            color: #ff69b4;
+            font-size: 1.3em;
+            margin-bottom: 8px;
+        }
+
+        .icon-box .text p {
+            color: #ffb6c1;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1200px) {
+            h2 { font-size: 2.5em; }
+            .grid-container { flex-direction: column; }
+            .two-columns { grid-template-columns: 1fr; }
+            .code-box { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        
+        <!-- SLIDE 1: LA GRILLA -->
+        <div class="slide">
+            <h2>LA GRILLA DEL AUTÓMATA</h2>
+            <div class="stars star1">✦</div>
+            <div class="stars star2">✧</div>
+            <div class="stars star3">✦</div>
+            <div class="stars star4">✧</div>
+            <div class="content-box">
+                <div class="section-title">🔲 Estructura Bidimensional</div>
+                <div class="intro-text">
+                    El torrente sanguíneo se modela como una grilla de 120 × 80 células, 
+                    donde cada celda representa un elemento del sistema sanguíneo.
+                </div>
+                
+                <ul class="list-items">
+                    <li><strong>Dimensiones:</strong> 120 columnas × 80 filas = 9,600 células totales</li>
+                    <li><strong>Inicialización:</strong> Cada célula comienza con un estado según probabilidades fisiológicas</li>
+                    <li><strong>Bordes:</strong> Las paredes de los vasos sanguíneos forman límites naturales</li>
+                    <li><strong>Distribución celular:</strong> 45% eritrocitos, 53% plasma, 2% leucocitos, 1% plaquetas</li>
+                </ul>
+
+                <div class="code-box">
+<span class="keyword">class</span> <span class="function">GrillaTorrenteSanguineo</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, ancho, alto):
+        self.__ancho = <span class="keyword">120</span>
+        self.__alto = <span class="keyword">80</span>
+        self.__grilla = [[<span class="function">CelulaSanguinea</span>() 
+                         <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(ancho)] 
+                         <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(alto)]
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: VECINDARIO DE MOORE -->
+        <div class="slide">
+            <h2>VECINDARIO DE MOORE</h2>
+            <div class="stars star1">✦</div>
+            <div class="stars star4">✧</div>
+            <div class="content-box">
+                <div class="section-title">👥 Análisis de 8 Vecinos</div>
+                
+                <div class="grid-container">
+                    <div class="grid-visual">
+                        <div class="grid-cell neighbor">↖</div>
+                        <div class="grid-cell neighbor">↑</div>
+                        <div class="grid-cell neighbor">↗</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        
+                        <div class="grid-cell neighbor">←</div>
+                        <div class="grid-cell center">🔴</div>
+                        <div class="grid-cell neighbor">→</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        
+                        <div class="grid-cell neighbor">↙</div>
+                        <div class="grid-cell neighbor">↓</div>
+                        <div class="grid-cell neighbor">↘</div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                    </div>
+                    
+                    <div class="grid-explanation">
+                        <ul class="list-items">
+                            <li>Cada célula analiza sus <strong>8 vecinos</strong> inmediatos</li>
+                            <li>Incluye vecinos <strong>horizontales, verticales y diagonales</strong></li>
+                            <li>Los bordes retornan <strong>None</strong> para posiciones fuera de límites</li>
+                            <li>Permite <strong>propagación rápida</strong> de virus e infección</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="code-box">
+<span class="keyword">def</span> <span class="function">obtenerVecinos</span>(self, fila, col):
+    vecinos = [<span class="keyword">None</span>] * <span class="keyword">8</span>
+    indice = <span class="keyword">0</span>
+    <span class="comment"># Recorrer vecindario 3x3 (excluyendo centro)</span>
+    <span class="keyword">for</span> df <span class="keyword">in</span> <span class="function">range</span>(-<span class="keyword">1</span>, <span class="keyword">2</span>):
+        <span class="keyword">for</span> dc <span class="keyword">in</span> <span class="function">range</span>(-<span class="keyword">1</span>, <span class="keyword">2</span>):
+            <span class="keyword">if</span> df == <span class="keyword">0</span> <span class="keyword">and</span> dc == <span class="keyword">0</span>:
+                <span class="keyword">continue</span>  <span class="comment"># Saltar célula central</span>
+            <span class="keyword">if</span> <span class="function">enLimites</span>(fila+df, col+dc):
+                vecinos[indice] = self.__grilla[fila+df][col+dc]
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: ALGORITMO DEL AUTÓMATA -->
+        <div class="slide">
+            <h2>ALGORITMO DEL AUTÓMATA</h2>
+            <div class="stars star2">✧</div>
+            <div class="stars star3">✦</div>
+            <div class="content-box">
+                <div class="section-title">⚙️ Proceso de Actualización en 2 Fases</div>
+                
+                <div class="intro-text">
+                    El autómata celular utiliza un algoritmo de <strong>doble buffer</strong> 
+                    para garantizar actualizaciones sincronizadas de todas las células.
+                </div>
+
+                <div class="two-columns">
+                    <div class="column-item">
+                        <h3>1️⃣ Fase de Cálculo</h3>
+                        <p>Cada célula analiza su vecindario y determina su próximo estado sin modificar la grilla actual.</p>
+                    </div>
+                    <div class="column-item">
+                        <h3>2️⃣ Fase de Aplicación</h3>
+                        <p>Todas las células actualizan simultáneamente a su nuevo estado calculado.</p>
+                    </div>
+                </div>
+
+                <div class="code-box">
+<span class="keyword">def</span> <span class="function">paso</span>(self):
+    <span class="comment"># FASE 1: Calcular próximo estado</span>
+    <span class="keyword">for</span> fila <span class="keyword">in</span> <span class="function">range</span>(self.__alto):
+        <span class="keyword">for</span> col <span class="keyword">in</span> <span class="function">range</span>(self.__ancho):
+            vecinos = self.<span class="function">obtenerVecinos</span>(fila, col)
+            siguienteEstado = self.__grilla[fila][col].<span class="function">calcularSiguienteEstado</span>(vecinos)
+            self.__grilla[fila][col].<span class="function">establecerSiguienteEstado</span>(siguienteEstado)
+    
+    <span class="comment"># FASE 2: Aplicar cambios simultáneos</span>
+    <span class="keyword">for</span> fila <span class="keyword">in</span> <span class="function">range</span>(self.__alto):
+        <span class="keyword">for</span> col <span class="keyword">in</span> <span class="function">range</span>(self.__ancho):
+            self.__grilla[fila][col].<span class="function">aplicarSiguienteEstado</span>()
+                </div>
+
+                <ul class="list-items" style="margin-top: 20px;">
+                    <li>Evita efectos de <strong>cascada no deseados</strong> durante la actualización</li>
+                    <li>Mantiene la <strong>consistencia temporal</strong> del sistema</li>
+                    <li>Permite <strong>reversibilidad teórica</strong> del autómata</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: REGLAS DE TRANSICIÓN -->
+        <div class="slide">
+            <h2>REGLAS DE TRANSICIÓN</h2>
+            <div class="stars star1">✦</div>
+            <div class="stars star3">✦</div>
+            <div class="content-box">
+                <div class="section-title">🔄 Lógica de Cambio de Estados</div>
+                
+                <div class="intro-text">
+                    Cada célula determina su próximo estado basándose en <strong>conteos</strong> 
+                    de sus vecinos y su <strong>estado interno</strong> (energía, carga viral, anticuerpos).
+                </div>
+
+                <div class="icon-box">
+                    <div class="icon">🦠</div>
+                    <div class="text">
+                        <h3>Infección Viral</h3>
+                        <p>Si una célula sana tiene ≥2 virus vecinos, puede infectarse según probabilidades. La carga viral aumenta con cada generación.</p>
+                    </div>
+                </div>
+
+                <div class="icon-box">
+                    <div class="icon">🛡️</div>
+                    <div class="text">
+                        <h3>Respuesta Inmune</h3>
+                        <p>Los leucocitos se activan al detectar ≥3 células infectadas. Generan anticuerpos y pueden eliminar virus vecinos.</p>
+                    </div>
+                </div>
+
+                <div class="icon-box">
+                    <div class="icon">💥</div>
+                    <div class="text">
+                        <h3>Explosión Celular</h3>
+                        <p>Células con carga viral ≥100 explotan, liberando 8 partículas virales hacia sus vecinos de plasma.</p>
+                    </div>
+                </div>
+
+                <div class="icon-box">
+                    <div class="icon">🧟</div>
+                    <div class="text">
+                        <h3>Zombificación</h3>
+                        <p>Células con energía ≤0 y alta carga viral se convierten en zombies, propagando infección agresivamente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: INTERFAZ TKINTER -->
+        <div class="slide">
+            <h2>INTERFAZ GRÁFICA - TKINTER</h2>
+            <div class="stars star2">✧</div>
+            <div class="stars star4">✧</div>
+            <div class="content-box">
+                <div class="section-title">🖥️ Visualización en Tiempo Real</div>
+                
+                <div class="intro-text">
+                    La interfaz desktop utiliza <strong>Tkinter</strong> para crear una 
+                    experiencia visual inmersiva del torrente sanguíneo.
+                </div>
+
+                <ul class="list-items">
+                    <li><strong>Canvas de visualización:</strong> 840×560 píxeles que renderizan 9,600 células en tiempo real</li>
+                    <li><strong>Dashboard médico:</strong> Panel lateral con métricas vitales actualizadas cada generación</li>
+                    <li><strong>Controles interactivos:</strong> Botones para iniciar, pausar, avanzar paso a paso y reiniciar</li>
+                    <li><strong>Inyección de virus:</strong> Introducción manual de patógenos en ubicaciones aleatorias</li>
+                    <li><strong>Multithreading:</strong> Simulación en hilo separado para mantener la UI responsiva</li>
+                    <li><strong>Scroll vertical:</strong> Contenedor scrollable para adaptarse a diferentes resoluciones</li>
+                </ul>
+
+                <div class="code-box">
+<span class="keyword">class</span> <span class="function">Simulador</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.root = tk.<span class="function">Tk</span>()
+        self.canvas = tk.<span class="function">Canvas</span>(
+            width=<span class="keyword">840</span>, 
+            height=<span class="keyword">560</span>,
+            bg=<span class="keyword">"#1a1a1a"</span>
+        )
+        self.<span class="function">crear_dashboard_medico</span>()
+        self.<span class="function">crear_panel_controles</span>()
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: INTERFAZ COLAB -->
+        <div class="slide">
+            <h2>INTERFAZ GOOGLE COLAB</h2>
+            <div class="stars star1">✦</div>
+            <div class="stars star3">✦</div>
+            <div class="content-box">
+                <div class="section-title">☁️ Versión en la Nube</div>
+                
+                <div class="intro-text">
+                    Para entornos sin capacidad de ejecutar Tkinter, se desarrolló una versión 
+                    compatible con <strong>Google Colab</strong> usando bibliotecas web.
+                </div>
+
+                <div class="two-columns">
+                    <div class="column-item">
+                        <h3>📊 Matplotlib</h3>
+                        <p>Renderiza la grilla del torrente sanguíneo como una imagen de píxeles coloreados, actualizada en cada frame.</p>
+                    </div>
+                    <div class="column-item">
+                        <h3>🎛️ ipywidgets</h3>
+                        <p>Proporciona controles interactivos (botones, sliders) que funcionan dentro de notebooks Jupyter.</p>
+                    </div>
+                </div>
+
+                <div class="code-box" style="margin-top: 30px;">
+<span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt
+<span class="keyword">from</span> ipywidgets <span class="keyword">import</span> Button, Output, VBox
+
+<span class="keyword">def</span> <span class="function">visualizar_grilla</span>():
+    fig, ax = plt.<span class="function">subplots</span>(figsize=(<span class="keyword">12</span>, <span class="keyword">8</span>))
+    matriz_colores = <span class="function">generar_matriz_rgb</span>(grilla)
+    ax.<span class="function">imshow</span>(matriz_colores, interpolation=<span class="keyword">'nearest'</span>)
+    plt.<span class="function">show</span>()
+
+<span class="comment"># Controles interactivos</span>
+btn_iniciar = <span class="function">Button</span>(description=<span class="keyword">'▶ Iniciar'</span>)
+btn_pausar = <span class="function">Button</span>(description=<span class="keyword">'⏸ Pausar'</span>)
+<span class="function">display</span>(<span class="function">VBox</span>([btn_iniciar, btn_pausar, output]))
+                </div>
+
+                <ul class="list-items" style="margin-top: 25px;">
+                    <li><strong>Compatibilidad:</strong> Funciona en cualquier navegador sin instalaciones</li>
+                    <li><strong>Portabilidad:</strong> Código ejecutable directamente desde GitHub o Drive</li>
+                    <li><strong>Limitaciones:</strong> Actualización más lenta que la versión Tkinter nativa</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

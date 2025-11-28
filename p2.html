@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Celular - Reglas del Autómata</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            position: relative;
+            background: radial-gradient(circle at center, #1a0a1a 0%, #0a0a0a 100%);
+        }
+
+        /* Virus floating background */
+        .slide::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(139, 0, 0, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 69, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: 15%;
+            right: 15%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        h1 {
+            font-size: 4em;
+            color: #c94580;
+            text-shadow: 0 0 20px #c94580, 0 0 40px #c94580;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: 8px;
+            z-index: 1;
+        }
+
+        h2 {
+            font-size: 3em;
+            color: #ff69b4;
+            text-shadow: 0 0 15px #ff69b4;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .rule-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1400px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .rule-box {
+            background: rgba(139, 0, 0, 0.15);
+            border: 3px solid #c94580;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(201, 69, 128, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .rule-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(201, 69, 128, 0.8);
+        }
+
+        .rule-title {
+            font-size: 1.8em;
+            color: #ff69b4;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icon {
+            font-size: 2em;
+        }
+
+        .rule-description {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #ffb6c1;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #c94580;
+            border-radius: 10px;
+            padding: 20px;
+            display: block;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #00ff00;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+
+        .keyword { color: #ff69b4; font-weight: bold; }
+        .function { color: #00d4ff; }
+        .number { color: #ffa500; }
+        .comment { color: #888; font-style: italic; }
+        .string { color: #90ee90; }
+
+        .cell-visual {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0 10px;
+            box-shadow: 0 0 15px currentColor;
+            vertical-align: middle;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 1.2em;
+            color: #c94580;
+            z-index: 1;
+            background: rgba(10, 10, 10, 0.8);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #c94580;
+            display: none;
+        }
+
+        .title-slide {
+            background: radial-gradient(circle at center, #2a0a2a 0%, #0a0a0a 100%);
+        }
+
+        .zombie-hand {
+            position: absolute;
+            bottom: -10%;
+            right: 5%;
+            font-size: 15em;
+            opacity: 0.3;
+            transform: rotate(-20deg);
+            animation: crawl 3s ease-in-out infinite;
+        }
+
+        @keyframes crawl {
+            0%, 100% { bottom: -10%; }
+            50% { bottom: -8%; }
+        }
+
+        .skull {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            font-size: 8em;
+            opacity: 0.2;
+            animation: shake 2s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .process-flow {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .flow-step {
+            background: rgba(139, 0, 0, 0.2);
+            border: 2px solid #c94580;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .arrow {
+            font-size: 3em;
+            color: #ff69b4;
+        }
+
+        @media (max-width: 1200px) {
+            .rule-container {
+                grid-template-columns: 1fr;
+            }
+            h1 { font-size: 3em; }
+            h2 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        
+        <!-- SLIDE 1: TÍTULO -->
+        <div class="slide title-slide">
+            <div class="skull">💀</div>
+            <h1>ZOMBIE CELULAR</h1>
+            <h2 style="font-size: 2.5em; color: #fff;">Reglas del Autómata Celular</h2>
+            <div style="margin-top: 40px; font-size: 1.5em; color: #ffb6c1; z-index: 1;">
+                <p>⚠️ Sistema Inmunológico vs Infección Viral</p>
+                <p style="margin-top: 20px;">🦠 Simulación Biológica en Python</p>
+            </div>
+            <div class="zombie-hand">✋</div>
+        </div>
+
+        <!-- SLIDE 2: GLÓBULOS ROJOS -->
+        <div class="slide">
+            <h2>🔴 GLÓBULOS ROJOS</h2>
+            <div class="rule-container">
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">🦠</span>
+                        Infección Viral
+                    </div>
+                    <div class="rule-description">
+                        Los glóbulos rojos son vulnerables al virus. El riesgo aumenta con la exposición:
+                        <div class="cell-visual" style="background: rgb(220, 20, 60);"></div> →
+                        <div class="cell-visual" style="background: rgb(255, 140, 0);"></div>
+                    </div>
+                    <code><span class="comment"># Cálculo del riesgo de infección</span>
+<span class="keyword">def</span> <span class="function">aplicarReglasGlobuloRojo</span>(self, a):
+    riesgoInfeccion = (a.cantidadVirus * <span class="number">0.25</span>) + \
+                      (a.cantidadInfectadas * <span class="number">0.15</span>) + \
+                      (self.cargaViral / <span class="number">200.0</span>)
+    
+    <span class="keyword">if</span> random.random() &lt; riesgoInfeccion:
+        <span class="keyword">return</span> EstadoCelular.CelulaRojaInfectada</code>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">🧟</span>
+                        Zombificación
+                    </div>
+                    <div class="rule-description">
+                        Rodeado por 6+ zombies, la célula se transforma:
+                        <div class="cell-visual" style="background: rgb(220, 20, 60);"></div> →
+                        <div class="cell-visual" style="background: rgb(139, 0, 0);"></div>
+                    </div>
+                    <code><span class="comment"># Zombificación directa</span>
+<span class="keyword">if</span> a.cantidadZombies &gt;= <span class="number">6</span>:
+    <span class="keyword">return</span> EstadoCelular.GlobuloRojoZombie
+
+<span class="comment"># Protección por anticuerpos</span>
+<span class="keyword">if</span> self.nivelAnticuerpos &gt; <span class="number">60</span> <span class="keyword">and</span> a.cantidadInmunes &gt;= <span class="number">3</span>:
+    self.cargaViral = max(<span class="number">0</span>, self.cargaViral - <span class="number">20</span>)</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: NEUTRÓFILOS -->
+        <div class="slide">
+            <h2>⚡ NEUTRÓFILOS - Respuesta Rápida</h2>
+            <div class="rule-container">
+                <div class="rule-box full-width">
+                    <div class="rule-title">
+                        <span class="icon">🛡️</span>
+                        Activación y Fagocitosis
+                    </div>
+                    <div class="rule-description">
+                        Primera línea de defensa. Se activan rápidamente y devoran patógenos:
+                        <div class="cell-visual" style="background: rgb(200, 200, 255);"></div> →
+                        <div class="cell-visual" style="background: rgb(0, 191, 255);"></div>
+                    </div>
+                    <code><span class="comment"># Activación ante amenaza</span>
+<span class="keyword">if not</span> estaActivado <span class="keyword">and</span> (a.cantidadVirus + a.cantidadInfectadas &gt;= <span class="number">2</span>):
+    self.nivelEnergia = <span class="number">100</span>
+    <span class="keyword">return</span> EstadoCelular.NeutrofiloActivado
+
+<span class="comment"># Fagocitosis - Destruye virus</span>
+<span class="keyword">if</span> a.cantidadVirus &gt; <span class="number">0</span> <span class="keyword">and</span> self.nivelEnergia &gt; <span class="number">30</span>:
+    probabilidadFagocitosis = <span class="number">0.65</span> - (self.cargaViral/<span class="number">200.0</span>)
+    <span class="keyword">if</span> random.random() &lt; probabilidadFagocitosis:
+        self.cargaViral = <span class="number">0</span>
+        self.nivelEnergia -= <span class="number">40</span>  <span class="comment"># Gasta energía</span>
+        
+        <span class="comment"># Puede morir tras fagocitar</span>
+        <span class="keyword">if</span> self.nivelEnergia &lt; <span class="number">20</span> <span class="keyword">or</span> random.random() &lt; <span class="number">0.3</span>:
+            <span class="keyword">return</span> EstadoCelular.Plasma</code>
+                </div>
+            </div>
+            <div class="process-flow">
+                <div class="flow-step">
+                    <div>🔵 Inactivo</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div>⚡ Detecta virus</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div>💠 Activado</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div>🍽️ Fagocita</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div>💀 Muerte celular</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: LINFOCITOS -->
+        <div class="slide">
+            <h2>🧠 LINFOCITOS - Memoria Inmune</h2>
+            <div class="rule-container">
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">🎓</span>
+                        Aprendizaje Inmunológico
+                    </div>
+                    <div class="rule-description">
+                        Generan memoria del patógeno para respuestas futuras más rápidas
+                    </div>
+                    <code><span class="comment"># Activación con memoria</span>
+umbralActivacion = <span class="number">2</span>
+<span class="keyword">if</span> self.memoriaInmune &gt; <span class="number">60</span>:
+    umbralActivacion = <span class="number">1</span>  <span class="comment"># ¡Más rápido!</span>
+
+<span class="keyword">if</span> a.cantidadInfectadas + a.cantidadZombies &gt;= umbralActivacion:
+    self.nivelAnticuerpos += <span class="number">25</span>
+    self.memoriaInmune += <span class="number">15</span>
+    <span class="keyword">return</span> EstadoCelular.LinfocitoActivado</code>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">💉</span>
+                        Producción de Anticuerpos
+                    </div>
+                    <div class="rule-description">
+                        Fabrican anticuerpos que neutralizan el virus y curan células infectadas
+                    </div>
+                    <code><span class="comment"># Producción acelerada</span>
+incrementoAnticuerpos = <span class="number">5</span>
+<span class="keyword">if</span> self.memoriaInmune &gt; <span class="number">70</span>:
+    incrementoAnticuerpos = <span class="number">8</span>
+
+<span class="comment"># Curación de infectadas</span>
+<span class="keyword">if</span> a.cantidadInfectadas &gt; <span class="number">0</span>:
+    bonusMemoria = self.memoriaInmune / <span class="number">200.0</span>
+    probabilidadCuracion = (<span class="number">0.35</span> + bonusMemoria) * \
+                           (self.nivelAnticuerpos / <span class="number">100.0</span>)</code>
+                </div>
+            </div>
+            <div style="margin-top: 30px; text-align: center; font-size: 1.3em; color: #ffb6c1;">
+                📊 <strong>Memoria Inmune:</strong> 0-40 🟢 Novato | 41-70 🟡 Entrenado | 71-100 🔴 Experto
+            </div>
+        </div>
+
+        <!-- SLIDE 5: MACRÓFAGOS -->
+        <div class="slide">
+            <h2>🦖 MACRÓFAGOS - Los Gigantes</h2>
+            <div class="rule-container">
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">🐘</span>
+                        Respuesta Lenta pero Poderosa
+                    </div>
+                    <div class="rule-description">
+                        Grandes y lentos, pero devoran células infectadas enteras
+                    </div>
+                    <code><span class="comment"># Requiere amenaza alta</span>
+<span class="keyword">if</span> a.cantidadVirus + a.cantidadInfectadas &gt;= <span class="number">3</span>:
+    self.nivelEnergia = <span class="number">100</span>
+    <span class="keyword">return</span> EstadoCelular.MacrofagoActivado
+
+<span class="comment"># Fagocitosis de células completas</span>
+<span class="keyword">if</span> a.cantidadInfectadas &gt; <span class="number">0</span>:
+    probabilidadFagocitosis = <span class="number">0.55</span>
+    <span class="keyword">if</span> random.random() &lt; probabilidadFagocitosis:
+        self.cargaViral = max(<span class="number">0</span>, self.cargaViral - <span class="number">25</span>)
+        self.nivelEnergia -= <span class="number">30</span></code>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">📡</span>
+                        Presentación de Antígenos
+                    </div>
+                    <div class="rule-description">
+                        "Enseñan" a los linfocitos, aumentando la memoria inmune del sistema
+                    </div>
+                    <code><span class="comment"># Entrena otras células</span>
+<span class="keyword">if</span> a.cantidadInmunes &gt; <span class="number">0</span> <span class="keyword">and</span> self.edadEstado % <span class="number">3</span> == <span class="number">0</span>:
+    self.memoriaInmune += <span class="number">10</span>
+
+<span class="comment"># Muy resistente pero no inmune</span>
+<span class="keyword">if</span> a.cantidadZombies &gt;= <span class="number">6</span> <span class="keyword">and</span> self.cargaViral &gt; <span class="number">90</span>:
+    probabilidadInfeccion = <span class="number">0.15</span> + (self.cargaViral/<span class="number">300.0</span>)
+    <span class="keyword">if</span> random.random() &lt; probabilidadInfeccion:
+        <span class="keyword">return</span> EstadoCelular.CelulaBlancaInfectada</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: VIRUS -->
+        <div class="slide">
+            <h2>🦠 PARTÍCULAS VIRALES</h2>
+            <div class="rule-container">
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">🎯</span>
+                        Estrategia de Infección
+                    </div>
+                    <div class="rule-description">
+                        Prefieren glóbulos rojos (más abundantes) pero pueden infectar células inmunes
+                    </div>
+                    <code><span class="comment"># Preferencia por glóbulos rojos</span>
+<span class="keyword">if</span> a.cantidadGlobulosRojos &gt; <span class="number">0</span> <span class="keyword">and</span> random.random() &lt; <span class="number">0.75</span>:
+    <span class="keyword">return</span> EstadoCelular.CelulaRojaInfectada
+
+<span class="comment"># Si no hay rojas, ataca inmunes</span>
+<span class="keyword">if</span> a.cantidadGlobulosRojos == <span class="number">0</span> <span class="keyword">and</span> a.cantidadInmunes &gt; <span class="number">0</span>:
+    <span class="keyword">if</span> random.random() &lt; <span class="number">0.4</span>:
+        <span class="keyword">return</span> EstadoCelular.CelulaBlancaInfectada</code>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">💥</span>
+                        Replicación y Explosión
+                    </div>
+                    <div class="rule-description">
+                        Después de 4 turnos, puede explotar liberando más virus
+                    </div>
+                    <code><span class="comment"># Ciclo de vida del virus</span>
+<span class="keyword">if</span> self.edadEstado &gt; <span class="number">4</span> <span class="keyword">and</span> a.cantidadVirus &lt; <span class="number">3</span>:
+    <span class="keyword">if</span> random.random() &lt; <span class="number">0.25</span>:
+        <span class="keyword">return</span> EstadoCelular.ExplosionViral
+
+<span class="comment"># Eliminación por sistema inmune</span>
+<span class="keyword">if</span> a.cantidadInmunes &gt;= <span class="number">2</span> <span class="keyword">or</span> self.nivelAnticuerpos &gt; <span class="number">60</span>:
+    probabilidadEliminacion = <span class="number">0.6</span> + (self.nivelAnticuerpos / <span class="number">200</span>)
+    <span class="keyword">if</span> random.random() &lt; probabilidadEliminacion:
+        <span class="keyword">return</span> EstadoCelular.Plasma</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: CÉLULAS INFECTADAS -->
+        <div class="slide">
+            <h2>🔥 CÉLULAS INFECTADAS</h2>
+            <div class="rule-container">
+                <div class="rule-box full-width">
+                    <div class="rule-title">
+                        <span class="icon">⏱️</span>
+                        Período de Incubación
+                    </div>
+                    <div class="rule-description">
+                        El virus se replica dentro de la célula. ¡El tiempo corre!
+                        <div class="cell-visual" style="background: rgb(255, 140, 0);"></div> →
+                        <div class="cell-visual" style="background: rgb(255, 69, 0);"></div> →
+                        <div class="cell-visual" style="background: rgb(139, 0, 0);"></div>
+                    </div>
+                    <code><span class="comment"># Período de incubación diferente</span>
+esRojaInfectada = (self.estadoActual == EstadoCelular.CelulaRojaInfectada)
+periodoIncubacion = <span class="number">3</span> <span class="keyword">if</span> esRojaInfectada <span class="keyword">else</span> <span class="number">4</span>
+
+<span class="comment"># Explosión viral al completar replicación</span>
+<span class="keyword">if</span> self.edadEstado &gt;= periodoIncubacion:
+    <span class="keyword">return</span> EstadoCelular.ExplosionViral
+
+<span class="comment"># Rescate por sistema inmune (más difícil con el tiempo)</span>
+probabilidadRescate = <span class="number">0.25</span> - (self.edadEstado * <span class="number">0.05</span>)
+
+<span class="keyword">if</span> esRojaInfectada:
+    <span class="keyword">if</span> a.cantidadInmunes &gt;= <span class="number">3</span> <span class="keyword">and</span> self.nivelAnticuerpos &gt; <span class="number">70</span>:
+        <span class="keyword">if</span> random.random() &lt; probabilidadRescate:
+            <span class="keyword">return</span> EstadoCelular.GlobuloRojo  <span class="comment"># ¡Salvada!</span></code>
+                </div>
+            </div>
+            <div class="process-flow" style="margin-top: 40px;">
+                <div class="flow-step" style="border-color: #dc143c;">
+                    <div>Turno 0</div>
+                    <div style="color: #ffa500;">Infectada</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step" style="border-color: #ff4500;">
+                    <div>Turno 1-2</div>
+                    <div style="color: #ffa500;">Replicando</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step" style="border-color: #ff0000;">
+                    <div>Turno 3</div>
+                    <div style="color: #ff4500;">💥 EXPLOSIÓN</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step" style="border-color: #8b0000;">
+                    <div>Turno 5</div>
+                    <div style="color: #8b0000;">🧟 Zombie</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: ZOMBIES -->
+        <div class="slide">
+            <h2>🧟‍♂️ ZOMBIFICACIÓN</h2>
+            <div class="rule-container">
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">☠️</span>
+                        Transformación Zombie
+                    </div>
+                    <div class="rule-description">
+                        Después de la explosión viral, las células se convierten en zombies
+                    </div>
+                    <code><span class="comment"># Explosión genera zombies</span>
+<span class="keyword">if</span> self.edadEstado &gt;= <span class="number">2</span>:
+    <span class="keyword">if</span> random.random() &lt; <span class="number">0.7</span>:
+        <span class="keyword">return</span> EstadoCelular.GlobuloRojoZombie
+    <span class="keyword">else</span>:
+        <span class="keyword">return</span> EstadoCelular.GlobuloBlancoZombie</code>
+                </div>
+
+                <div class="rule-box">
+                    <div class="rule-title">
+                        <span class="icon">⚰️</span>
+                        Necrosis y Eliminación
+                    </div>
+                    <div class="rule-description">
+                        Los zombies son difíciles de eliminar, pero no inmortales
+                    </div>
+                    <code><span class="comment"># Eliminación por inmune masivo</span>
+<span class="keyword">if</span> a.cantidadInmunes &gt;= <span class="number">5</span> <span class="keyword">and</span> self.nivelAnticuerpos &gt; <span class="number">80</span>:
+    <span class="keyword">if</span> self.edadEstado &gt; <span class="number">20</span> <span class="keyword">and</span> random.random() &lt; <span class="number">0.15</span>:
+        <span class="keyword">return</span> EstadoCelular.TejidoNecrotico
+
+<span class="comment"># Necrosis natural (lenta)</span>
+<span class="keyword">if</span> self.edadEstado &gt; <span class="number">50</span>:
+    <span class="keyword">if</span> random.random() &lt; <span class="number">0.05</span>:
+        <span class="keyword">return</span> EstadoCelular.TejidoNecrotico</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: PLAQUETAS Y COÁGULOS -->
+        <div class="slide">
+            <h2>🩹 PLAQUETAS - Defensa por Barreras</h2>
+            <div class="rule-container">
+                <div class="rule-box full-width">
+                    <div class="rule-title">
+                        <span class="icon">🧱</span>
+                        Formación de Coágulos
+                        </div>
+                    <div class="rule-description">
+                        Las plaquetas crean barreras físicas al detectar amenazas cercanas
+                        <div class="cell-visual" style="background: rgb(255, 215, 0);"></div> →
+                        <div class="cell-visual" style="background: rgb(139, 69, 19);"></div>
+                    </div>
+                    <code><span class="comment"># Coagulación defensiva</span>
+<span class="keyword">if</span> a.cantidadPlaquetas &gt;= <span class="number">3</span> <span class="keyword">and</span> (a.cantidadInfectadas + a.cantidadZombies) &gt; <span class="number">1</span>:
+    probabilidadCoagulo = <span class="number">0.3</span> + (a.cantidadZombies * <span class="number">0.1</span>)
+    <span class="keyword">if</span> random.random() &lt; probabilidadCoagulo:
+        <span class="keyword">return</span> EstadoCelular.CoaguloSangre
+
+<span class="comment"># Vulnerabilidad ante virus</span>
+<span class="keyword">if</span> a.cantidadVirus &gt;= <span class="number">2</span> <span class="keyword">and</span> self.cargaViral &gt; <span class="number">40</span>:
+    <span class="keyword">return</span> EstadoCelular.ParticulaVirus</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: COÁGULOS - DISOLUCIÓN -->
+        <div class="slide">
+            <h2>💧 COÁGULOS SANGUÍNEOS</h2>
+            <div class="rule-container">
+                <div class="rule-box full-width">
+                    <div class="rule-title">
+                        <span class="icon">💧</span>
+                        Disolución de Coágulos
+                    </div>
+                    <div class="rule-description">
+                        Los coágulos se disuelven cuando la amenaza desaparece
+                    </div>
+                    <code><span class="comment"># Disolución si no hay amenaza</span>
+<span class="keyword">if</span> (self.edadEstado &gt; <span class="number">25</span> <span class="keyword">and</span> a.cantidadZombies == <span class="number">0</span> <span class="keyword">and</span> 
+    a.cantidadInfectadas == <span class="number">0</span>):
+    <span class="keyword">if</span> random.random() &lt; <span class="number">0.2</span>:
+        <span class="keyword">return</span> EstadoCelular.Plasma
+
+<span class="comment"># Se mantienen mientras haya infección</span>
+<span class="keyword">return</span> EstadoCelular.CoaguloSangre</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: TEJIDO NECRÓTICO -->
+        <div class="slide">
+            <h2>⚫ TEJIDO NECRÓTICO</h2>
+            <div class="rule-container">
+                <div class="rule-box full-width">
+                    <div class="rule-title">
+                        <span class="icon">💀</span>
+                        Necrosis y Regeneración
+                    </div>
+                    <div class="rule-description">
+                        Restos de células zombies destruidas. Pueden regenerarse muy lentamente
+                    </div>
+                    <code><span class="comment"># Regeneración extremadamente lenta</span>
+<span class="keyword">if</span> self.edadEstado &gt; <span class="number">80</span>:
+    <span class="keyword">if</span> random.random() &lt; <span class="number">0.1</span>:
+        <span class="keyword">return</span> EstadoCelular.Plasma
+
+<span class="keyword">return</span> EstadoCelular.TejidoNecrotico</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: PLASMA -->
+        <div class="slide">
+            <h2>💧 PLASMA SANGUÍNEO</h2>
+            <div class="rule-container">
+                <div class="rule-box full-width">
+                    <div class="rule-title">
+                        <span class="icon">💧</span>
+                        Estado Base del Sistema
+                    </div>
+                    <div class="rule-description">
+                        El plasma es el estado neutro. Puede regenerar cualquier tipo de célula según las necesidades del sistema
+                    </div>
+                    <code><span class="comment"># Estado neutro del sistema</span>
+<span class="comment"># El plasma es el lienzo</span>
+<span class="comment"># para nueva vida celular</span>
+
+<span class="keyword">return</span> EstadoCelular.Plasma</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: RESUMEN -->
+        <div class="slide" style="background: radial-gradient(circle at center, #2a0a2a 0%, #0a0a0a 100%);">
+            <h2>🎯 EQUILIBRIO DINÁMICO</h2>
+            <div style="max-width: 1200px; text-align: center; z-index: 1;">
+                <div style="font-size: 1.5em; color: #ffb6c1; margin-bottom: 50px;">
+                    El sistema simula una batalla biológica constante entre:<br>
+                    <strong style="color: #ff69b4; font-size: 1.3em;">🛡️ Sistema Inmune</strong> vs <strong style="color: #ff4500; font-size: 1.3em;">🦠 Infección Viral</strong>
+                </div>
+                
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 30px; margin: 50px 0;">
+                    <div style="background: rgba(139, 0, 0, 0.2); border: 2px solid #c94580; border-radius: 15px; padding: 30px; min-width: 180px;">
+                        <div style="font-size: 3em;">🦠</div>
+                        <div style="margin-top: 15px; font-size: 1.3em;"><strong>Virus</strong></div>
+                        <div style="font-size: 1em; color: #ffb6c1; margin-top: 10px;">
+                            Infecta rápido<br>Se replica<br>Crea zombies
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 3em; color: #ff69b4;">⚔️</div>
+                    
+                    <div style="background: rgba(139, 0, 0, 0.2); border: 2px solid #c94580; border-radius: 15px; padding: 30px; min-width: 180px;">
+                        <div style="font-size: 3em;">⚡</div>
+                        <div style="margin-top: 15px; font-size: 1.3em;"><strong>Neutrófilos</strong></div>
+                        <div style="font-size: 1em; color: #ffb6c1; margin-top: 10px;">
+                            Primera respuesta<br>Fagocitan virus<br>Mueren rápido
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 3em; color: #ff69b4;">⚔️</div>
+                    
+                    <div style="background: rgba(139, 0, 0, 0.2); border: 2px solid #c94580; border-radius: 15px; padding: 30px; min-width: 180px;">
+                        <div style="font-size: 3em;">🧠</div>
+                        <div style="margin-top: 15px; font-size: 1.3em;"><strong>Linfocitos</strong></div>
+                        <div style="font-size: 1em; color: #ffb6c1; margin-top: 10px;">
+                            Aprenden<br>Producen anticuerpos<br>Curan infectadas
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 3em; color: #ff69b4;">⚔️</div>
+                    
+                    <div style="background: rgba(139, 0, 0, 0.2); border: 2px solid #c94580; border-radius: 15px; padding: 30px; min-width: 180px;">
+                        <div style="font-size: 3em;">🦖</div>
+                        <div style="margin-top: 15px; font-size: 1.3em;"><strong>Macrófagos</strong></div>
+                        <div style="font-size: 1em; color: #ffb6c1; margin-top: 10px;">
+                            Lentos pero fuertes<br>Devoran células<br>Entrenan al sistema
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 60px; padding: 40px; background: rgba(139, 0, 0, 0.2); border: 3px solid #c94580; border-radius: 20px;">
+                    <h3 style="color: #ff69b4; margin-bottom: 30px; font-size: 2.5em;">⚖️ Factores Críticos del Sistema</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; text-align: left;">
+                        <div>
+                            <div style="color: #00d4ff; font-weight: bold; font-size: 1.2em;">📊 Carga Viral</div>
+                            <div style="font-size: 1em; color: #ffb6c1; margin-top: 5px;">Determina riesgo de infección</div>
+                        </div>
+                        <div>
+                            <div style="color: #00d4ff; font-weight: bold; font-size: 1.2em;">💉 Nivel de Anticuerpos</div>
+                            <div style="font-size: 1em; color: #ffb6c1; margin-top: 5px;">Protección y curación</div>
+                        </div>
+                        <div>
+                            <div style="color: #00d4ff; font-weight: bold; font-size: 1.2em;">🧠 Memoria Inmune</div>
+                            <div style="font-size: 1em; color: #ffb6c1; margin-top: 5px;">Respuesta más rápida</div>
+                        </div>
+                        <div>
+                            <div style="color: #00d4ff; font-weight: bold; font-size: 1.2em;">⚡ Nivel de Energía</div>
+                            <div style="font-size: 1em; color: #ffb6c1; margin-top: 5px;">Capacidad de acción</div>
+                        </div>
+                        <div>
+                            <div style="color: #00d4ff; font-weight: bold; font-size: 1.2em;">⏱️ Edad del Estado</div>
+                            <div style="font-size: 1em; color: #ffb6c1; margin-top: 5px;">Progresión temporal</div>
+                        </div>
+                        <div>
+                            <div style="color: #00d4ff; font-weight: bold; font-size: 1.2em;">👥 Vecindario</div>
+                            <div style="font-size: 1em; color: #ffb6c1; margin-top: 5px;">Interacciones locales</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        📜 Desplázate para ver todas las reglas
+    </div>
+
+</body>
+</html>

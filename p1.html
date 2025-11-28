@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Celular - Contexto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            position: relative;
+            background: radial-gradient(circle at center, #1a0a1a 0%, #0a0a0a 100%);
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(139, 0, 0, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 69, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: 15%;
+            right: 15%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        h1 {
+            font-size: 5em;
+            color: #c94580;
+            text-shadow: 0 0 20px #c94580, 0 0 40px #c94580;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: 8px;
+            z-index: 1;
+        }
+
+        h2 {
+            font-size: 3.5em;
+            color: #ff69b4;
+            text-shadow: 0 0 15px #ff69b4;
+            margin-bottom: 40px;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .content-box {
+            background: rgba(139, 0, 0, 0.15);
+            border: 3px solid #c94580;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(201, 69, 128, 0.4);
+            z-index: 1;
+        }
+
+        .intro-text {
+            font-size: 1.4em;
+            line-height: 1.8;
+            color: #ffb6c1;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .list-items {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .list-items li {
+            font-size: 1.3em;
+            color: #ffb6c1;
+            margin-bottom: 20px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .list-items li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #ff69b4;
+            font-size: 1.5em;
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: #ff69b4;
+            text-shadow: 0 0 10px #ff69b4;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .column-item {
+            font-size: 1.2em;
+            color: #ffb6c1;
+            text-align: center;
+        }
+
+        .image-container {
+            width: 400px;
+            height: 300px;
+            border: 3px solid #8b7ff0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .stars {
+            position: absolute;
+            font-size: 2em;
+            opacity: 0.5;
+        }
+
+        .star1 { top: 5%; right: 10%; }
+        .star2 { top: 15%; left: 15%; }
+        .star3 { bottom: 10%; left: 20%; }
+        .star4 { bottom: 20%; right: 15%; }
+
+        .skull-decoration {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            font-size: 8em;
+            opacity: 0.2;
+            animation: shake 2s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .hand-decoration {
+            position: absolute;
+            bottom: -10%;
+            right: 5%;
+            font-size: 15em;
+            opacity: 0.3;
+            transform: rotate(-20deg);
+            animation: crawl 3s ease-in-out infinite;
+        }
+
+        @keyframes crawl {
+            0%, 100% { bottom: -10%; }
+            50% { bottom: -8%; }
+        }
+
+        /* Estados celulares */
+        .states-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .state-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #c94580;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .state-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 0 20px rgba(201, 69, 128, 0.6);
+        }
+
+        .state-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        .state-name {
+            font-size: 1.1em;
+            color: #ffb6c1;
+        }
+
+        .category-header {
+            grid-column: 1 / -1;
+            font-size: 1.5em;
+            color: #ff69b4;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(139, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid #c94580;
+        }
+
+        /* ESTILOS PARA LA PORTADA MEJORADA */
+        .title-slide {
+            background: radial-gradient(circle at 50% 30%, #3a0a3a 0%, #1a0515 50%, #0a0a0a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .virus-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .virus {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            opacity: 0.4;
+            animation: virus-float 10s ease-in-out infinite;
+        }
+
+        .virus:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; font-size: 60px; }
+        .virus:nth-child(2) { top: 20%; right: 15%; animation-delay: 2s; font-size: 80px; }
+        .virus:nth-child(3) { bottom: 25%; left: 8%; animation-delay: 4s; font-size: 70px; }
+        .virus:nth-child(4) { bottom: 15%; right: 12%; animation-delay: 1s; font-size: 50px; }
+        .virus:nth-child(5) { top: 50%; left: 5%; animation-delay: 3s; font-size: 65px; }
+        .virus:nth-child(6) { top: 60%; right: 8%; animation-delay: 5s; font-size: 55px; }
+
+        @keyframes virus-float {
+            0%, 100% { 
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0.4;
+            }
+            25% { 
+                transform: translate(20px, -20px) rotate(90deg);
+                opacity: 0.6;
+            }
+            50% { 
+                transform: translate(0, -40px) rotate(180deg);
+                opacity: 0.3;
+            }
+            75% { 
+                transform: translate(-20px, -20px) rotate(270deg);
+                opacity: 0.5;
+            }
+        }
+
+        .title-content {
+            z-index: 10;
+            text-align: center;
+        }
+
+        .main-title {
+            font-size: 6.5em;
+            background: linear-gradient(45deg, #ff1493, #c94580, #ff69b4, #8b008b);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 3s ease infinite;
+            text-shadow: none;
+            filter: drop-shadow(0 0 30px rgba(201, 69, 128, 0.8));
+            margin-bottom: 20px;
+            letter-spacing: 15px;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 2.2em;
+            color: #ffb6c1;
+            text-shadow: 0 0 20px rgba(255, 182, 193, 0.6);
+            margin-bottom: 50px;
+            letter-spacing: 5px;
+            font-weight: normal;
+        }
+
+        .integrantes-box {
+            background: rgba(139, 0, 0, 0.25);
+            border: 3px solid #c94580;
+            border-radius: 25px;
+            padding: 40px 60px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 40px rgba(201, 69, 128, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .integrantes-title {
+            font-size: 2em;
+            color: #ff69b4;
+            text-shadow: 0 0 15px #ff69b4;
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+        }
+
+        .integrante-item {
+            font-size: 1.3em;
+            color: #ffb6c1;
+            margin: 15px 0;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #ff69b4;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .integrante-item:hover {
+            background: rgba(201, 69, 128, 0.2);
+            transform: translateX(10px);
+            border-left-width: 8px;
+        }
+
+        .blood-cells {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            opacity: 0.6;
+        }
+
+        .blood-cell {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            filter: blur(1px);
+        }
+
+        .blood-cell:nth-child(1) { 
+            background: radial-gradient(circle, rgba(220, 20, 60, 0.8) 0%, rgba(139, 0, 0, 0.4) 100%);
+            animation-delay: 0s;
+        }
+        .blood-cell:nth-child(2) { 
+            background: radial-gradient(circle, rgba(0, 191, 255, 0.8) 0%, rgba(0, 100, 200, 0.4) 100%);
+            animation-delay: 0.5s;
+        }
+        .blood-cell:nth-child(3) { 
+            background: radial-gradient(circle, rgba(255, 255, 0, 0.8) 0%, rgba(255, 140, 0, 0.4) 100%);
+            animation-delay: 1s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-title { font-size: 4em; }
+            .subtitle { font-size: 1.6em; }
+            h1 { font-size: 3.5em; }
+            h2 { font-size: 2.5em; }
+            .two-columns { grid-template-columns: 1fr; }
+            .states-grid { grid-template-columns: 1fr; }
+            .integrantes-box { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        
+        <!-- SLIDE 1: PORTADA MEJORADA -->
+        <div class="slide title-slide">
+            <!-- Partículas de virus flotando -->
+            <div class="virus-particles">
+                <div class="virus">🦠</div>
+                <div class="virus">🦠</div>
+                <div class="virus">🦠</div>
+                <div class="virus">🦠</div>
+                <div class="virus">🦠</div>
+                <div class="virus">🦠</div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="title-content">
+                <h1 class="main-title">ZOMBIE CELULAR</h1>
+                <div class="subtitle">Autómata Celular | Sistema Inmunológico vs Virus</div>
+                
+                <!-- Caja de integrantes -->
+                <div class="integrantes-box">
+                    <div class="integrantes-title">INTEGRANTES</div>
+                    <div class="integrante-item">Alejandra Díaz Navarro - 2240063</div>
+                    <div class="integrante-item">Heydan Ricardo Calderón Villamizar - 2240077</div>
+                    <div class="integrante-item">Juan Manuel Niño Piña - 2240040</div>
+                    <div class="integrante-item">Daniel Santiago Borrero García - 2221917</div>
+                    <div class="integrante-item">Sara Sofía Solano Rocha - 2240058</div>
+                    <div class="integrante-item">Paula Andrea Vanges Franco - 2231861</div>
+                </div>
+            </div>
+
+            <!-- Células sanguíneas decorativas -->
+            <div class="blood-cells">
+                <div class="blood-cell"></div>
+                <div class="blood-cell"></div>
+                <div class="blood-cell"></div>
+            </div>
+
+            <div class="stars star1">✦</div>
+            <div class="stars star2">✧</div>
+            <div class="stars star3">✦</div>
+            <div class="stars star4">✧</div>
+        </div>
+
+        <!-- SLIDE 2: CONTEXTO -->
+        <div class="slide">
+            <h2>CONTEXTO</h2>
+            <div class="stars star1">✦</div>
+            <div class="stars star2">✧</div>
+            <div class="stars star3">✦</div>
+            <div class="content-box">
+                <div class="intro-text">
+                    El Virus Wildfire es un patógeno ficticio ultra-agresivo presente de forma latente en todos los humanos, 
+                    concentrado en el cerebro. Permanece dormido sin síntomas hasta activarse por mordida zombi o 
+                    muerte natural, reactivando el tallo cerebral para crear vectores agresivos (zombis) que solo buscan 
+                    infectar o consumir vivos.
+                </div>
+                
+                <div style="display: flex; gap: 40px; align-items: center; justify-content: center; margin-top: 30px;">
+                    <div class="image-container">
+                        <div style="width: 100%; height: 100%; background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22><rect fill=%22%231a0a1a%22 width=%22400%22 height=%22300%22/><text x=%2250%25%22 y=%2250%25%22 font-size=%2240%22 fill=%22%23ff69b4%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>🦠 Virus Wildfire</text></svg>'); background-size: cover;"></div>
+                    </div>
+                    <div style="flex: 1;">
+                        <ul class="list-items">
+                            <li>Introducción al Cuerpo por Mordida</li>
+                            <li>Reacción del Cuerpo</li>
+                            <li>Momento de la Fiebre</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: IMPLEMENTACIÓN DEL CONTEXTO -->
+        <div class="slide">
+            <h2>IMPLEMENTACIÓN DEL CONTEXTO</h2>
+            <div class="content-box">
+                <div class="section-title">Análisis del Vecindario</div>
+                <div class="intro-text" style="font-size: 1.2em;">
+                    Cada célula analiza su vecindario para contabilizar:
+                </div>
+                
+                <div class="two-columns">
+                    <div class="column-item">
+                        • Cantidad de virus alrededor.
+                    </div>
+                    <div class="column-item">
+                        • Carga viral acumulada y energía disponible.
+                    </div>
+                    <div class="column-item">
+                        • Células inmunes presentes y su nivel de anticuerpos.
+                    </div>
+                    <div class="column-item">
+                        • Células infectadas, zombis, coágulos y plasma.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: ESTADOS CELULARES -->
+        <div class="slide">
+            <h2>ESTADOS CELULARES</h2>
+            <div class="content-box" style="max-width: 1400px;">
+                <div class="states-grid">
+                    
+                    <div class="category-header">🩸 Células Sanas</div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(255, 240, 240);"></div>
+                        <div class="state-name">Plasma</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(220, 20, 60);"></div>
+                        <div class="state-name">Glóbulo Rojo (Eritrocito)</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(200, 200, 255);"></div>
+                        <div class="state-name">Neutrófilo</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(100, 149, 237);"></div>
+                        <div class="state-name">Linfocito</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(70, 130, 180);"></div>
+                        <div class="state-name">Macrófago</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(255, 182, 193);"></div>
+                        <div class="state-name">Plaqueta</div>
+                    </div>
+
+                    <div class="category-header">⚡ Sistema Inmune Activado</div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(0, 191, 255);"></div>
+                        <div class="state-name">Neutrófilo Activado</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(30, 144, 255);"></div>
+                        <div class="state-name">Linfocito Activado</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(0, 100, 200);"></div>
+                        <div class="state-name">Macrófago Activado</div>
+                    </div>
+
+                    <div class="category-header">🦠 Proceso de Infección</div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(255, 255, 0);"></div>
+                        <div class="state-name">Partícula Viral</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(255, 140, 0);"></div>
+                        <div class="state-name">Glóbulo Rojo Infectado</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(255, 165, 0);"></div>
+                        <div class="state-name">Glóbulo Blanco Infectado</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(255, 69, 0);"></div>
+                        <div class="state-name">Explosión Viral</div>
+                    </div>
+
+                    <div class="category-header">🧟 Transformación Zombie</div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(139, 0, 0);"></div>
+                        <div class="state-name">Glóbulo Rojo Zombificado</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(128, 0, 0);"></div>
+                        <div class="state-name">Glóbulo Blanco Zombificado</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(80, 0, 0);"></div>
+                        <div class="state-name">Tejido Necrótico</div>
+                    </div>
+
+                    <div class="category-header">🧱 Coagulación y Barreras</div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(100, 50, 50);"></div>
+                        <div class="state-name">Coágulo de Sangre</div>
+                    </div>
+                    
+                    <div class="state-item">
+                        <div class="state-color" style="background: rgb(0, 0, 0);"></div>
+                        <div class="state-name">Pared de Vaso Sanguíneo</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: CONCLUSIONES -->
+        <div class="slide">
+            <h2>CONCLUSIONES</h2>
+            <div class="stars star1">✦</div>
+            <div class="stars star4">✧</div>
+            <div class="content-box">
+                <ul class="list-items">
+                    <li>Se puede mejorar la simulación haciendo que las células se muevan.</li>
+                    
+                    <li>Sirve para aplicaciones en la vida real como videojuegos o simulaciones de propagación de enfermedad.</li>
+                    
+                    <li>Se acerca a una simulación del comportamiento de la propagación de un virus y cómo actúa el cuerpo en respuesta.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
