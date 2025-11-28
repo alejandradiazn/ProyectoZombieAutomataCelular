@@ -4,19 +4,19 @@
 ## Tipos de Células.
 
 ### Células Sanas
-- **Plasma** (53%): Estado neutro, base del sistema
-- **Glóbulos Rojos** (45%): Transportan oxígeno, objetivo principal del virus
-- **Neutrófilos** (0.6%): Respuesta rápida ante infecciones
-- **Linfocitos** (0.3%): Respuesta adaptativa, producen anticuerpos y memoria inmune
-- **Macrófagos** (0.1%): Respuesta lenta pero poderosa, fagocitan células completas
-- **Plaquetas** (1%): Forman barreras defensivas mediante coagulación
+- **Plasma** (53%): Estado neutro, base del sistema.
+- **Glóbulos Rojos** (45%): Transportan oxígeno, objetivo principal del virus.
+- **Neutrófilos** (0.6%): Respuesta rápida ante infecciones..
+- **Linfocitos** (0.3%): Respuesta adaptativa, producen anticuerpos y memoria inmune.
+- **Macrófagos** (0.1%): Respuesta lenta pero poderosa, fagocitan células completas.
+- **Plaquetas** (1%): Forman barreras defensivas mediante coagulación.
 
 ### Estados de Infección
-- **Partícula Viral**: Virus libre buscando infectar células
-- **Célula Infectada**: Célula en periodo de incubación (replicación viral)
-- **Explosión Viral**: Liberación masiva de virus
-- **Célula Zombie**: Célula senescente que no funciona ni muere
-- **Tejido Necrótico**: Restos de células zombie destruidas
+- **Partícula Viral**: Virus libre buscando infectar células.
+- **Célula Infectada**: Célula en periodo de incubación (replicación viral).
+- **Explosión Viral**: Liberación masiva de virus.
+- **Célula Zombie**: Célula senescente que no funciona ni muere.
+- **Tejido Necrótico**: Restos de células zombie destruidas.
 
 ---
 
@@ -125,10 +125,10 @@ Los macrófagos permanecen activos más tiempo que otras células. Solo se desac
 Las plaquetas forman barreras físicas mediante coagulación. La probabilidad de formar un coágulo es del 30% base, aumentando un 10% por cada célula zombie cercana.
 
 *Condiciones para coagulación:*
-- Debe haber al menos 3 plaquetas en el área
-- Debe haber más de 1 célula infectada o zombie cerca
-- Se genera un número aleatorio que se compara con la probabilidad calculada
-- Si tiene éxito, la plaqueta se convierte en coágulo sanguíneo
+- Debe haber al menos 3 plaquetas en el área.
+- Debe haber más de 1 célula infectada o zombie cerca.
+- Se genera un número aleatorio que se compara con la probabilidad calculada.
+- Si tiene éxito, la plaqueta se convierte en coágulo sanguíneo.
 
 #### Vulnerabilidad ante Virus
 Las plaquetas son vulnerables a la infección viral directa; así se plantea que hay 2 o más virus cercanos y la carga viral de la plaqueta supera 40, se convierte en una partícula de virus.
@@ -150,8 +150,8 @@ Los virus tienen una estrategia inteligente de infección:
 
 #### Tiempo de Incubación Variable.
 El periodo de incubación depende del tipo de célula infectada:
-- **Glóbulos rojos infectados**: 3 turnos de incubación
-- **Células blancas infectadas**: 4 turnos de incubación (más resistentes)
+- **Glóbulos rojos infectados**: 3 turnos de incubación.
+- **Células blancas infectadas**: 4 turnos de incubación (más resistentes).
 
 #### Explosión Viral Inevitable
 Una vez que el periodo de incubación se completa, la célula inevitablemente explota liberando nuevos virus, no hay forma de evitar esto si no se rescata a tiempo.
@@ -177,8 +177,8 @@ El sistema inmune tiene una ventana de tiempo limitada para rescatar células in
 
 #### Transformación a Zombie
 Después de permanecer 2 turnos en estado de explosión viral, la célula se transforma definitivamente en zombie:
-- **70% de probabilidad**: Se convierte en glóbulo rojo zombie
-- **30% de probabilidad**: Se convierte en glóbulo blanco zombie
+- **70% de probabilidad**: Se convierte en glóbulo rojo zombie.
+- **30% de probabilidad**: Se convierte en glóbulo blanco zombie.
 
 La explosión viral representa el momento en que el virus ha destruido completamente la célula y la ha convertido en una "célula zombie" que ya no funciona correctamente.
 
@@ -190,10 +190,10 @@ La explosión viral representa el momento en que el virus ha destruido completam
 Las células zombie son extremadamente difíciles de eliminar, lo que termina requiriendo una respuesta inmune masiva.
 
 **Condiciones necesarias:**
-- Al menos 5 células inmunes cercanas (respuesta coordinada)
-- Nivel de anticuerpos superior a 80
-- La célula zombie debe tener más de 20 turnos de edad
-- Solo un 15% de probabilidad de éxito incluso cumpliendo todas las condiciones
+- Al menos 5 células inmunes cercanas (respuesta coordinada).
+- Nivel de anticuerpos superior a 80.
+- La célula zombie debe tener más de 20 turnos de edad.
+- Solo un 15% de probabilidad de éxito incluso cumpliendo todas las condiciones.
 
 Si la eliminación tiene éxito, la célula zombie se convierte en tejido necrótico (restos celulares).
 
@@ -210,10 +210,10 @@ Las células zombie pueden degradarse naturalmente con el tiempo, pero este proc
 Los coágulos actúan como barreras temporales y tienen la capacidad de disolverse cuando ya no son necesarios.
 
 **Condiciones para disolución:**
-- El coágulo debe tener más de 25 turnos de edad (debe ser maduro)
-- No debe haber células zombie en el área
-- No debe haber células infectadas en el área
-- Solo un 20% de probabilidad por turno de disolverse (proceso gradual)
+- El coágulo debe tener más de 25 turnos de edad (debe ser maduro).
+- No debe haber células zombie en el área.
+- No debe haber células infectadas en el área.
+- Solo un 20% de probabilidad por turno de disolverse (proceso gradual).
 
 Si se disuelve, el coágulo se convierte en plasma, permitiendo que el flujo sanguíneo vuelva a la normalidad.
 
@@ -240,13 +240,13 @@ El tejido necrótico representa el daño residual más severo causado por la inf
 La carga viral de cada célula se actualiza en cada turno considerando lo siguiente.
 
 *Incrementos (factores que aumentan la carga):*
-- Cada virus cercano suma 12 puntos
-- Cada célula infectada cercana suma 6 puntos
-- Cada célula zombie cercana suma 10 puntos
+- Cada virus cercano suma 12 puntos.
+- Cada célula infectada cercana suma 6 puntos.
+- Cada célula zombie cercana suma 10 puntos.
 
 *Decrementos (factores que reducen la carga):*
-- Cada célula inmune cercana resta 18 puntos
-- Los anticuerpos totales del vecindario se suman y dividen entre 10, restando ese valor
+- Cada célula inmune cercana resta 18 puntos.
+- Los anticuerpos totales del vecindario se suman y dividen entre 10, restando ese valor.
 
 Es importante mencionar que la carga viral siempre se mantiene entre 0 y 100 puntos.
 
@@ -338,8 +338,8 @@ La interfaz muestra las siguientes métricas vitales:
 
 ### 🔬 Análisis Celular
 Conteo en tiempo real de:
-- **Eritrocitos** (glóbulos rojos)
-- **Leucocitos** (glóbulos blancos) con células activas
-- **Infectadas** (células en periodo de incubación)
-- **Virus** (partículas virales libres)
-- **Zombie** (células senescentes)
+- **Eritrocitos** (glóbulos rojos).
+- **Leucocitos** (glóbulos blancos) con células activas.
+- **Infectadas** (células en periodo de incubación).
+- **Virus** (partículas virales libres).
+- **Zombie** .
