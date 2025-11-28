@@ -1,21 +1,18 @@
 # 🧬 Simulador de Infección Zombie en Torrente Sanguíneo
 
-## 📋 Descripción General
+## Descripción General.
 
-Este proyecto es un **autómata celular** que simula la propagación de una infección zombie a nivel sanguíneo. El sistema modela el comportamiento del torrente sanguíneo humano durante una infección viral agresiva, visualizando la lucha entre el sistema inmune y un patógeno zombificante.
+Este proyecto es un autómata celualr que pretende simular la propagación de una infección zombie a nivel sanguíneo. El sistema modela el comportamiento del torrente sanguíneo humano durante una infección viral agresiva, visualizando la lucha entre el sistema inmune y un patógeno zombificante.
 
-La simulación utiliza una grilla bidimensional donde cada célula representa un componente sanguíneo que evoluciona según reglas probabilísticas inspiradas en procesos biológicos reales.
+En su elaboración, la simulación utiliza una grilla donde cada célula representa un componente sanguíneo que evoluciona según reglas probabilísticas inspiradas en procesos biológicos reales.
 
 ---
 
-## 🎯 Objetivo del Proyecto
+## Objetivos del Proyecto.
 
-Visualizar mediante un autómata celular:
-- La propagación viral en el sistema sanguíneo
-- La respuesta del sistema inmunitario
-- La zombificación progresiva del organismo
-- Los mecanismos de defensa celular (fagocitosis, anticuerpos, memoria inmune)
-- La formación de barreras defensivas (coágulos)
+- Observar propagación viral en el sistema sanguíneo.
+- Generar una aproximación de la respuesta del sistema inmunitario y sus mecanismos de defensa.
+- Visualizar la zombificación progresiva del organismo.
 
 ---
 
@@ -46,9 +43,9 @@ Visualizar mediante un autómata celular:
 El riesgo de infección se calcula sumando tres factores:
 - La cantidad de virus cercanos multiplicada por 0.25
 - La cantidad de células infectadas cercanas multiplicada por 0.15
-- La carga viral de la célula dividida entre 200
+- La carga viral de la célula dividida entre 200.
 
-#### Reglas Probabilísticas
+#### Reglas Probabilísticas.
 1. **Infección por exposición**: Se genera un número aleatorio entre 0 y 1. Si este número es menor que el riesgo calculado, el glóbulo rojo se infecta.
 
 2. **Zombificación directa**: Si el glóbulo rojo está rodeado por 6 o más células zombie, se convierte inmediatamente en glóbulo rojo zombie sin pasar por el periodo de infección.
@@ -57,19 +54,19 @@ El riesgo de infección se calcula sumando tres factores:
 
 ---
 
-### ⚪ **NEUTRÓFILOS** (Respuesta Rápida)
+### ⚪ **NEUTRÓFILOS** (Representación de Respuesta Rápida)
 
 #### Activación
-Los neutrófilos se activan cuando detectan 2 o más virus o células infectadas en su vecindario. Al activarse, su nivel de energía se restaura a 100.
+Los neutrófilos se activan cuando detectan 2 o más virus o células infectadas en su vecindario y, al activarse, su nivel de energía se restaura a 100.
 
-#### Fagocitosis (Neutrófilos Activados)
+#### Fagocitosis (Se ejecuta con los Neutrófilos Activados).
 La probabilidad de fagocitosis exitosa es de 65%, pero disminuye si la célula tiene alta carga viral. Por cada 200 puntos de carga viral, la probabilidad baja proporcionalmente.
 
-**Proceso de fagocitosis:**
+*Proceso de fagocitosis:*
 1. Si hay virus cercanos y el neutrófilo tiene más de 30 puntos de energía:
-   - Se genera un número aleatorio para determinar si la fagocitosis tiene éxito
-   - Si tiene éxito: elimina completamente el virus (carga viral a 0) y gasta 40 puntos de energía
-   - **Muerte celular por agotamiento**: Si la energía cae por debajo de 20 o si aleatoriamente (30% de probabilidad) ocurre, el neutrófilo muere y se convierte en plasma
+   - Se genera un número aleatorio para determinar si la fagocitosis tiene éxito.
+   - Si tiene éxito: elimina completamente el virus (carga viral a 0) y gasta 40 puntos de energía.
+   - **Muerte celular por agotamiento**: Si la energía cae por debajo de 20 o si aleatoriamente (30% de probabilidad) ocurre, el neutrófilo muere y se convierte en plasma.
 
 #### Resistencia a Infección
 Los neutrófilos tienen resistencia moderada. La probabilidad de infección base es del 35%, aumentando según la carga viral (cada 150 puntos de carga viral suma proporcionalmente a la probabilidad).
